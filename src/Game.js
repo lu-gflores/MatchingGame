@@ -1,5 +1,6 @@
 import Grid from './Grid.js'
-const {init, GameLoop, Sprite, initPointer, track} = kontra;
+import Board from './Board.js'
+const { init, GameLoop, Sprite, initPointer, track } = kontra;
 
 
 export default class Game {
@@ -13,7 +14,7 @@ export default class Game {
     }
     init() {
         console.log('initalizing gamne')
-        const {canvas, context} = init();
+        const { canvas, context } = init();
         this.canvas = canvas;
         this.context = context;
         initPointer();
@@ -22,9 +23,9 @@ export default class Game {
             update: this.update.bind(this),
             render: this.render.bind(this),
         });
-        
-        this.createGrid()
 
+        this.createGrid()
+        this.createBoard()
         this.load();
     }
     render() {
@@ -52,5 +53,13 @@ export default class Game {
             y: 180,
             color: 'lavender'
         });
+    }
+    createBoard() {
+        this.board = new Board(
+            this.numberOfRows,
+            this.numberOfCols,
+            6,
+            true
+        )
     }
 }
