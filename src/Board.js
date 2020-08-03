@@ -141,4 +141,43 @@ export default class Board {
         })
         this.consoleLog();
     }
+    dropBlock(sourceRow, targetRow, col){
+        this.grid[targetRow][col] = this.grid[sourceRow][col]
+        this.grid[sourceRow][col] = 0;
+        //drop block object
+
+    }
+    dropReserveBlock(sourceRow, targetRow, col){
+        this.grid[targetRow][col] = this.reserverGrid[sourceRow][col]
+        this.reserverGrid[sourceRow][col] = 0;
+        //drop block object
+    }
+    updateGrid() {
+        for(let i = this.rows -1; i >= 0; i--) {
+            for(let j = 0; i < this.cols; i++) {
+                if(this.grid[i][j] === 0 ){
+                    let foundBlock = false;
+
+                    for(let k = i - 1; k >= 0; k--) {
+                        if(this.grid[k][j] > 0 ){
+                            foundBlock = true;
+                            this.dropBlock(k, i, j);
+                            break;
+                        }
+                    }
+
+                    if(!foundBlock) {
+                        for(let k = this.rows - 1; k >= 0; k--) {
+                            if(this.reserveGrid[k][j] > 0 ) {
+                                this.dropReserveBlock(k, i , j);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        this.populateReserveGrid();
+        this.consoleLog();
+    }
 }
