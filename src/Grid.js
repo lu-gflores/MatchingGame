@@ -1,4 +1,4 @@
-const {Sprite} = kontra;
+const {Sprite, Pool} = kontra;
 
 export default class Grid {
     constructor(config) {
@@ -12,7 +12,10 @@ export default class Grid {
         this.height =  this.numberOfRows * this.cellSize;
         this.width = this.numberOfCols * this.cellSize;
         this.backgroundSprite = null;
-        this.gridSprites = [];
+        this.gridSpritesPool = Pool({
+            create: Sprite,
+            
+        });
 
         this.init();
         
@@ -27,33 +30,32 @@ export default class Grid {
         });
         //vertical lines
         for(let i = 0; i < this.width + this.cellSize; i += this.cellSize) {
-            const sprite = Sprite({
+           this.gridSpritesPool.get({
                 x: this.x + i,
                 y: this.y + 0,
                 color: this.color,
                 width: 1,
                 height: this.height
-            });
-            this.gridSprites.push(sprite)
+            })
         }
         //horizontal lines
         for(let i = 0; i < this.height + this.cellSize; i += this.cellSize) {
-            const sprite = Sprite({
+            this.gridSpritesPool.get({
                 x: this.x + 0,
                 y: this.y + i,
                 color: this.color,
                 width: this.width,
                 height: 1
             });
-            this.gridSprites.push(sprite)
+            
         }
     }
     render () {
         if(this.backgroundSprite) {
+            this.backgroundSprite.context.globalAlpha = 0.2; //transparent background
             this.backgroundSprite.render()
+            this.backgroundSprite.context.globalAlpha = 1;
         }
-        this.gridSprites.forEach((sprite) => {
-            sprite.render()
-        })
+        this.gridSpritesPool.render();
     }
 }
