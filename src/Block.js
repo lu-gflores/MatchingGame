@@ -6,4 +6,7 @@ export default class Block extends Sprite.class{
         this.col = 0;
         this.selected = false;
     }
+    kill(){
+        this.ttl = 0
+    }
 }

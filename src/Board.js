@@ -1,5 +1,6 @@
 export default class Board {
-    constructor(rows, cols, blockVariations, debug = false) {
+    constructor(state, rows, cols, blockVariations, debug = false) {
+        this.state = state;
         this.rows = rows;
         this.cols = cols;
         this.blockVariations = blockVariations;
@@ -21,8 +22,12 @@ export default class Board {
         for (let i = 0; i < this.rows; i++) {
             for (let j = 0; j < this.cols; j++) {
                 const variation = Math.floor(Math.random() * this.blockVariations) + 1
-                this.grid[i].push(variation)
+                this.grid[i][j] = variation
             }
+        }
+        const chains = this.findAllChains()
+        if (chains.length > 0) {
+            this.populateGrid();
         }
     }
 
@@ -30,7 +35,7 @@ export default class Board {
         for (let i = 0; i < this.rows; i++) {
             for (let j = 0; j < this.cols; j++) {
                 const variation = Math.floor(Math.random() * this.blockVariations) + 1
-                this.reserverGrid[i].push(variation)
+                this.reserverGrid[i][j] = variation
             }
         }
     }
@@ -136,7 +141,7 @@ export default class Board {
             this.grid[block.row][block.col] = 0;
     
             //destroy block
-
+            this.state.getBlockFromColRow(block) //.kill();
 
         })
         this.consoleLog();
@@ -145,12 +150,13 @@ export default class Board {
         this.grid[targetRow][col] = this.grid[sourceRow][col]
         this.grid[sourceRow][col] = 0;
         //drop block object
-
+        this.state.dropBlock(sourceRow, targetRow, col)
     }
     dropReserveBlock(sourceRow, targetRow, col){
         this.grid[targetRow][col] = this.reserverGrid[sourceRow][col]
         this.reserverGrid[sourceRow][col] = 0;
         //drop block object
+        this.state.dropReserveBlock(sourceRow, targetRow, col)
     }
     updateGrid() {
         for(let i = this.rows -1; i >= 0; i--) {

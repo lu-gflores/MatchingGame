@@ -100,6 +100,7 @@ export default class Game {
 
     createBoard() {
         this.board = new Board(
+            this,
             this.numberOfRows,
             this.numberOfCols,
             6,
@@ -197,5 +198,42 @@ export default class Game {
         } else {
             this.clearSelection();
         }
+    }
+    
+    getBlockFromColRow(position) {
+        let foundBlock;
+        this.blockPool.getAliveObjects().some((block) => {
+            if(block.row === position.row && block.col === position.col) {
+                foundBlock = block
+                return true
+            }
+            return false
+        })
+        return foundBlock
+    }
+
+    dropBlock(sourceRow, targetRow, col) {
+        const block = this.getBlockFromColRow({row: sourceRow, col})
+        const targetY =  183 + targetRow * (this.blockSize + 4)
+        block.row = targetRow
+        block.y = targetY
+
+    }   
+
+    dropReserveBlock(sourceRow, targetRow, col) {
+        const x =  28 + col * (this.blockSize + 4)
+        const y = 183 + targetRow * (this.blockSize + 4)
+        const block = this.blockPool.get({
+            x, 
+            y,
+            col,
+            row: targetRow,
+            image: this.assets[this.board.grid[targetRow][col]],
+            ttl: Infinity
+        });
+        block.onDown = () => {
+            this.pickBlock(block);
+        };
+        track(block)
     }
 }
