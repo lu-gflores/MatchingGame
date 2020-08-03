@@ -13,6 +13,7 @@ export default class Game {
         this.blockSize = 35;
         this.init();
     }
+
     init() {
         console.log('initalizing gamne')
         const { canvas, context } = init();
@@ -29,16 +30,29 @@ export default class Game {
         this.createBoard()
         this.load();
     }
+
     render() {
         //render sprites
         this.grid.render()
         if(this.blockPool) {
-            this.blockPool.render();
+            this.blockPool.getAliveObjects().forEach((block) => {
+                if(block.selected) {
+                    block.context.globalAlpha = 0.6
+                } else{
+                    block.context.globalAlpha = 1
+                }
+                block.render();
+                block.context.globalAlpha = 1;
+            })
         }
     }
-    update() {
 
+    update() {
+        if (this.blockPool){
+            this.blockPool.update()
+        }
     }
+
     load() {
         console.log('loading assets')
 
@@ -66,11 +80,13 @@ export default class Game {
         })
         
     }
+
     start() {
         console.log('starting game')
         this.gameLoop.start()
         this.drawBoard()
     }
+
     createGrid() {
         this.grid = new Grid({
             numberOfRows: this.numberOfRows,
@@ -81,12 +97,13 @@ export default class Game {
             color: 'lavender'
         });
     }
+
     createBoard() {
         this.board = new Board(
             this.numberOfRows,
             this.numberOfCols,
             6,
-            true
+            false
         );
         //window.board = this.board;
         
@@ -96,6 +113,7 @@ export default class Game {
             },
         })
     }
+
     drawBoard() {
         for (let i = 0; i < this.numberOfRows; i++) {
             for (let j = 0; j < this.numberOfCols; j++) {
@@ -109,7 +127,75 @@ export default class Game {
                     image: this.assets[this.board.grid[i][j]],
                     ttl: Infinity,
                 });
+                block.onDown = () => {
+                    this.pickBlock(block);
+                };
+                track(block);
             }
+        }
+    }
+
+    pickBlock(block) {
+        if(this.isBoardBlocked) {
+            return;
+        }
+        //first or second block?
+        if(!this.selectedBlock) {
+            block.selected = true;
+            this.selectedBlock = block;
+        } else {
+            //second block selected is our target block
+            this.targetBlock = block;
+            if(this.board.checkAdjacent(this.selectedBlock, this.targetBlock)) {
+                this.isBoardBlocked =  true;
+
+                this.swapBlocks(this.selectedBlock, this.targetBlock);
+
+            } else {
+                this.clearSelection()
+            }
+        }
+    }
+
+    swapBlocks(block1, block2) {
+        //swap location 
+        const tempX = block1.x;
+        const tempY = block1.y;
+        block1.x = block2.x;
+        block1.y = block2.y;
+        block2.x = tempX;
+        block2.y = tempY;
+
+        this.board.swap(block1, block2);
+        if(!this.isReversingSwap) {
+        //check for chains
+        const chains = this.board.findAllChains();
+        if(chains.length > 0) {
+            this.updateBoard();
+        } else {
+            this.isReversingSwap = true;
+            this.swapBlocks(block1, block2);
+        }
+        } else {
+           this.isReversingSwap = false;
+           this.clearSelection(); 
+        }
+    }
+
+    clearSelection() {
+        this.isBoardBlocked = false;
+        this.selectedBlock.selected = false;
+        this.selectedBlock = null;
+    }
+    updateBoard() {
+        this.board.clearChains();
+        this.board.updateGrid();
+
+        const chains = this.board.findAllChains()
+        if(chains.length > 0) {
+            this.updateBoard();
+        } else {
+            this.clearSelection();
         }
     }
 }
