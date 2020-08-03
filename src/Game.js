@@ -60,6 +60,8 @@ export default class Game {
             this.numberOfCols,
             6,
             true
-        )
+        );
+        window.board = this.board;
+        
     }
 }

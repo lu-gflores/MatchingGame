@@ -61,4 +61,24 @@ export default class Board {
         }
 
     }
+    swap(source, target) {
+        const temp = this.grid[target.row][target.col];
+        this.grid[target.row][target.col] = this.grid[source.row][source.col]
+        this.grid[source.row][source.col] = temp;
+        const tempPos = {
+            row: source.row,
+            col: source.col,
+        }
+        source.row = target.row
+        source.col = target.col
+        target.row = tempPos.row
+        target.col = tempPos.col
+        this.consoleLog();
+    }
+    checkAdjacent(source, target) {
+        const diffRow = Math.abs(source.row - target.row);
+        const diffCol = Math.abs(source.col - target.col);
+        const isAdjacent = (diffRow === 1 && diffCol === 0) || (diffRow === 0 && diffCol === 1)
+        return isAdjacent
+    }
 }
